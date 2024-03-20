@@ -135,23 +135,13 @@ public:
     /**
      *  Walks the path, returning "edges" only. Thus it does not return kMove, but will return
      *  the final closing "edge" for each contour.
-     *  e.g.
-     *      path.moveTo(A).lineTo(B).lineTo(C).moveTo(D).lineTo(E)
-     *  will return
-     *      kLine   A..B
-     *      kLine   B..C
-     *      kLine   C..A
-     *      kLine   D..E
-     *      kLine   E..D
-     *      kDone
      *
      * Typical calling pattern...
      *
-     *   GPoint pts[kMaxNextPoints];
+     *   GPoint pts[GPath::kMaxNextPoints];
      *   GPath::Edger edger(path);
-     *   GPath::Verb v;
-     *   while ((v = edger.next(pts)) != GPath::kDone) {
-     *       switch (v) {
+     *   while (auto v = edger.next(pts)) {
+     *       switch (v.value()) {
      *           case GPath::kLine: // lpts[0..1]
      *           case GPath::kQuad: // pts[0..2]
      *           case GPath::kCubic: // pts[0..3]
