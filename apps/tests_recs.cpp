@@ -13,6 +13,7 @@
 #include "tests_pa2.cpp"
 #include "tests_pa3.cpp"
 #include "tests_pa4.cpp"
+#include "tests_pa5.cpp"
 
 const GTestRec gTestRecs[] = {
     { test_clear,       "clear"         },
@@ -30,6 +31,13 @@ const GTestRec gTestRecs[] = {
     { test_path_poly,   "test_path_poly",   },
     { test_path_transform, "path_transform" },
     { test_path_nodraw, "path_nodraw" },
+
+    { test_edger_quads, "test_edger_quads"  },
+    { test_path_circle, "test_path_circle"  },
+    { test_path_transform2, "test_path_transform2" },
+    { test_path_chop_quad,   "path_chop_quad"    },
+    { test_path_chop_cubic,   "path_chop_cubic"    },
+    { test_path_bounds, "path_bounds" },
 
     { nullptr, nullptr },
 };

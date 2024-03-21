@@ -10,9 +10,9 @@ static void test_edger_quads(GTestStats* stats) {
     int N = 0;
 
     GPath path;
-    path.moveTo(p[0]).quadTo(p[1], p[2]);  N++;
-    path.moveTo(p[0]).quadTo(p[1], p[2]);  N++;
-    path.moveTo(p[0]).quadTo(p[1], p[2]);  N++;
+    path.moveTo(p[0]); path.quadTo(p[1], p[2]);  N++;
+    path.moveTo(p[0]); path.quadTo(p[1], p[2]);  N++;
+    path.moveTo(p[0]); path.quadTo(p[1], p[2]);  N++;
 
     GPath::Edger edger(path);
     GPoint pts[3];
@@ -25,7 +25,7 @@ static void test_edger_quads(GTestStats* stats) {
     assert(edger.next(pts) == GPath::kLine);
     assert(pts[0] == p[2]);
     assert(pts[1] == p[0]);
-    assert(edger.next(pts) == GPath::kDone);
+    assert(!edger.next(pts));
 }
 
 static void test_path_circle(GTestStats* stats) {
@@ -41,7 +41,7 @@ static void test_path_circle(GTestStats* stats) {
 static void test_path_transform2(GTestStats* stats) {
     GPath p;
 
-    p.moveTo(10, 10).lineTo(20, 10).lineTo(20, 40).quadTo(10, 40, 10, 10);
+    p.moveTo(10, 10); p.lineTo(20, 10); p.lineTo(20, 40); p.quadTo(10, 40, 10, 10);
     EXPECT_TRUE(stats, p.bounds() == GRect::LTRB(10, 10, 20, 40));
 
     GMatrix mx = GMatrix::Scale(2, 3);
@@ -55,17 +55,20 @@ static void test_path_transform2(GTestStats* stats) {
                 pts_q[4];
 
     for (;;) {
-        GPath::Verb verb_p = iter_p.next(pts_p);
-        GPath::Verb verb_q = iter_q.next(pts_q);
-        EXPECT_TRUE(stats, verb_p == verb_q);
+        auto np = iter_p.next(pts_p);
+        auto nq = iter_q.next(pts_q);
+        EXPECT_EQ(stats, np.has_value(), nq.has_value());
+        if (!np.has_value() || !nq.has_value()) {
+            break;
+        }
+        EXPECT_TRUE(stats, np.value() == nq.value());
 
         int count;
-        switch (verb_p) {
+        switch (np.value()) {
             case GPath::kMove:  count = 1; break;
             case GPath::kLine:  count = 2; break;
             case GPath::kQuad:  count = 3; break;
             case GPath::kCubic: count = 4; break;
-            case GPath::kDone: return;
         }
         mx.mapPoints(pts_p, count);
         for (int i = 0; i < count; ++i) {
@@ -75,7 +78,7 @@ static void test_path_transform2(GTestStats* stats) {
 }
 
 static bool nearly_eq(float a, float b) {
-    return fabs(a - b) <= 0.0001;
+    return fabs(a - b) <= 0.0001f;
 }
 
 static bool nearly_eq(GPoint a, GPoint b) {
@@ -128,21 +131,21 @@ static void test_path_bounds(GTestStats* stats) {
     EXPECT_TRUE(stats, path.bounds() == r);
 
     path = GPath();
-    path.moveTo(0, 0)
-        .quadTo(150, 0, 75, 75)
-        .quadTo(0, 150, 0, 0);
+    path.moveTo(0, 0);
+    path.quadTo(150, 0, 75, 75);
+    path.quadTo(0, 150, 0, 0);
     r = {0, 0, 100, 100};
     EXPECT_TRUE(stats, nearly_eq(path.bounds(), r));
 
     path = GPath();
-    path.moveTo (50, 100)
-        .cubicTo(100, 0, 0, 0, 50, 100);
+    path.moveTo (50, 100);
+    path.cubicTo(100, 0, 0, 0, 50, 100);
     r = {35.5662f, 25, 64.4338f, 100};
     EXPECT_TRUE(stats, nearly_eq(path.bounds(), r));
 
     path = GPath();
-    path.moveTo (0, 50)
-        .cubicTo(100, 0, 100, 100, 0, 50);
+    path.moveTo (0, 50);
+    path.cubicTo(100, 0, 100, 100, 0, 50);
     r = {0, 35.5662f, 75, 64.4338f};
     EXPECT_TRUE(stats, nearly_eq(path.bounds(), r));
 }
